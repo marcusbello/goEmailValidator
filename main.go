@@ -6,9 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net"
+	"net/http"
 	"regexp"
 	"strings"
 )
+
+type Result struct {
+	Email    string `json:"email"`
+	Domain   string `json:"domain"`
+	Validity string `json:"validity"`
+	Reason   string `json:"reason"`
+}
 
 var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9-)?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
@@ -19,14 +27,13 @@ func isValid(e string) bool {
 	return emailRegex.MatchString(e)
 }
 
-func getdomain(email string) (domain string, err error) {
-	splitemail := strings.Split(email, "@")
-	if len(splitemail) < 2 {
-		err = errors.New("Not a valid email!, missing the @ symbol")
+func getDomain(email string) (domain string, err error) {
+	split := strings.Split(email, "@")
+	if len(split) < 2 {
+		err = errors.New("not a valid email")
 		return "", err
 	}
-	domain = splitemail[1]
-	//fmt.Println(domain)
+	domain = split[1]
 	return domain, err
 }
 
@@ -44,35 +51,48 @@ func checkMx(domain string) (bool bool, err error) {
 }
 
 func main() {
+
 	router := gin.Default()
 	router.GET("/validate/:Email", verifyHandler)
 	err := router.Run("localhost:8081")
 	if err != nil {
 		log.Fatal(err)
 	}
-	//email := "nowayout@netnaija.com"
-	//validator(email)
 }
 
 func verifyHandler(c *gin.Context) {
 	email := c.Param("Email")
-	validator(email)
-	
+	result := validator(email)
+	c.JSON(http.StatusOK, result)
 }
 
-func validator(email string) {
+func validator(email string) (result Result) {
+	result = Result{
+		Email:    email,
+		Domain:   "nil",
+		Validity: "nil",
+		Reason:   "nil",
+	}
+	domain, err := getDomain(email)
+	result.Domain = domain
 	if isValid(email) {
-		domain, err := getdomain(email)
 		_, err = checkMx(domain)
 		if err != nil {
+			fmt.Println("Error on domain")
+			result.Reason = "No MX record set for domain"
+			result.Validity = "Not a valid email"
 			return
 		}
-
 		fmt.Println("Email:", email, "is valid")
+		valid := "Email is valid"
+		result.Validity = valid
 		return
 	}
 	if !isValid(email) {
-		fmt.Println("Bad email")
+		fmt.Println("Bad email syntax")
+		result.Reason = "Bad email syntax"
+		result.Validity = "Not a valid email"
 		return
 	}
+	return result
 }
