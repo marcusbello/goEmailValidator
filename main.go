@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -52,9 +53,10 @@ func checkMx(domain string) (bool bool, err error) {
 
 func main() {
 
+	port := os.Getenv("PORT")
 	router := gin.Default()
 	router.GET("/validate/:Email", verifyHandler)
-	err := router.Run("localhost:8080")
+	err := router.Run(":" + port)
 	if err != nil {
 		log.Fatal(err)
 	}
