@@ -80,9 +80,9 @@ func validator(email string) (result Result) {
 	if isValid(email) {
 		_, err = checkMx(domain)
 		if err != nil {
-			fmt.Println("Error on domain")
-			result.Reason = "No MX record set for domain"
-			result.Validity = "Not a valid email"
+			fmt.Println("error on domain")
+			result.Reason = "no MX record set for domain"
+			result.Validity = "not a valid email"
 			return
 		}
 		fmt.Println("Email:", email, "is valid")
@@ -91,9 +91,9 @@ func validator(email string) (result Result) {
 		return
 	}
 	if !isValid(email) {
-		fmt.Println("Bad email syntax")
-		result.Reason = "Bad email syntax"
-		result.Validity = "Not a valid email"
+		fmt.Println("bad email syntax")
+		result.Reason = "bad email syntax"
+		result.Validity = "not a valid email"
 		return
 	}
 	return result
