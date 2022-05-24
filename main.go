@@ -86,7 +86,7 @@ func validator(email string) (result Result) {
 			return
 		}
 		fmt.Println("Email:", email, "is valid")
-		valid := "Email is valid"
+		valid := "email is valid"
 		result.Validity = valid
 		return
 	}
