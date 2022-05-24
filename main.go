@@ -54,7 +54,7 @@ func main() {
 
 	router := gin.Default()
 	router.GET("/validate/:Email", verifyHandler)
-	err := router.Run("localhost:8081")
+	err := router.Run("localhost:8080")
 	if err != nil {
 		log.Fatal(err)
 	}
