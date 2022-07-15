@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 )
@@ -53,7 +52,8 @@ func checkMx(domain string) (bool bool, err error) {
 
 func main() {
 
-	port := os.Getenv("PORT")
+	//port := os.Getenv("PORT")
+	port := "3030"
 	router := gin.Default()
 	router.GET("/:Email", verifyHandler)
 	router.POST("/:Email", verifyHandler)
