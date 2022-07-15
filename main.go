@@ -55,7 +55,8 @@ func main() {
 
 	port := os.Getenv("PORT")
 	router := gin.Default()
-	router.GET("/validate/:Email", verifyHandler)
+	router.GET("/:Email", verifyHandler)
+	router.POST("/:Email", verifyHandler)
 	err := router.Run(":" + port)
 	if err != nil {
 		log.Fatal(err)
