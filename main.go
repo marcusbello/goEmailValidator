@@ -3,12 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Result struct {
@@ -42,8 +43,7 @@ func checkMx(domain string) (bool bool, err error) {
 	_, err = net.LookupMX(domain)
 	if err != nil {
 		fmt.Println("Bad Domain: ", err)
-		bool = false
-		return false, err
+		return bool, err
 	}
 	//fmt.Println(mx)
 	bool = true
@@ -55,8 +55,10 @@ func main() {
 	//port := os.Getenv("PORT")
 	port := "3030"
 	router := gin.Default()
-	router.GET("/:Email", verifyHandler)
-	router.POST("/:Email", verifyHandler)
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, "Okay!")
+	})
+	router.POST("/validate-email", verifyHandler)
 	err := router.Run(":" + port)
 	if err != nil {
 		log.Fatal(err)
@@ -64,13 +66,23 @@ func main() {
 }
 
 func verifyHandler(c *gin.Context) {
-	email := c.Param("Email")
-	result := validator(email)
+	body := struct {
+		Email string
+	}{}
+	if err := c.BindJSON(&body); err != nil {
+		errResponse := struct {
+			Error string
+		}{
+			Error: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, errResponse)
+	}
+	result := validator(body.Email)
 	c.JSON(http.StatusOK, result)
 }
 
-func validator(email string) (result Result) {
-	result = Result{
+func validator(email string) (result *Result) {
+	result = &Result{
 		Email:    email,
 		Domain:   "nil",
 		Validity: "nil",
@@ -87,15 +99,13 @@ func validator(email string) (result Result) {
 			return
 		}
 		fmt.Println("Email:", email, "is valid")
-		valid := "email is valid"
-		result.Validity = valid
+		result.Validity = "email is valid"
+		result.Reason = "syntax and MX records checks out"
 		return
-	}
-	if !isValid(email) {
+	} else {
 		fmt.Println("bad email syntax")
 		result.Reason = "bad email syntax"
-		result.Validity = "not a valid email"
-		return
+		result.Validity = err.Error()
 	}
-	return result
+	return
 }

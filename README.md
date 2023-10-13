@@ -3,9 +3,16 @@ Email Validator Api written in Golang using Gin gonic as the webserver for routi
 
 ## How it works: - 
 
-Example if you send a GET or POST request to localhost e.g 
+***Request*** : Send a POST request to domain e.g 
 
-`http://localhost:3030/nowix@email.com`
+`http://example:3030/validate-email`
+
+- ***Body*** 
+
+` { "email":"testemail@domain.com" } `
+
+
+### Response
 
 This will be your response formatted in json:
 
@@ -17,6 +24,6 @@ This will be your response formatted in json:
 "reason": "nil"
 }
 ```
-The validation is done by checking regex and then checking the domain mx if it exists.
+The validation is done by checking input with email regex first and then, it will check the domain mx records.
 
 
